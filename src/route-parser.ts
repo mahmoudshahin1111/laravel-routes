@@ -1,5 +1,7 @@
 import { Route, RouteGroup } from "./types";
 
+
+
 export class RouteParser{
     parse(route:string):Route{
         const transformedRoutes: Route[] = [];
@@ -12,6 +14,10 @@ export class RouteParser{
         return parsedRoute;
     }
     parseRouteGroup(payload:string):RouteGroup{
+        //(function\((.|\n)*?\)\{(.|\n)*?}\));
         return {} as RouteGroup;
+    }
+    parseRoute(payload:string):Route{
+        return {} as Route;
     }
 }

@@ -50,5 +50,5 @@ export class PayloadFilter {
         });
         return filteredPayload;
     }
-
+    
 }

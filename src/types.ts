@@ -1,11 +1,12 @@
 
 export interface Route{
-    group:Route;
-    prefix:string
+    prefix:string;
+    payload:string;
 }
 export interface RouteGroup{
-    prefix:string;
+    prefix?:string;
     routes:Route[];
+    payload:string;
 }
 export interface Config{
     routesDirPath:string

@@ -1,8 +1,13 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
+import { Container } from "./container";
 import { Exception } from "./exception";
+import { FileParser } from "./file-parser";
 import { LaravelRoutes } from "./laravel-routes";
+import { PayloadFilter } from "./payload-filter";
+import { RouteParser } from "./route-parser";
+import { Storage } from "./storage";
 import { CONFIG } from "./utils/config";
 
 // this method is called when your extension is activated
@@ -16,14 +21,26 @@ export function activate(context: vscode.ExtensionContext) {
   // Now provide the implementation of the command with registerCommand
   // The commandId parameter must match the command field in package.json
   let start = vscode.commands.registerCommand(`${CONFIG.commandPrefix}.start`, (routesFolder: string) => {
-    LaravelRoutes.make({
-      routesDirPath: "routes"
-    })
-      .start()
+    // provide all the dependance
+    const container = new Container();
+    const routeParser = new RouteParser();
+    const payloadFilter = new PayloadFilter();
+    const storage = new Storage(container);
+    const fileParser = new FileParser(routeParser, payloadFilter);
+    container.register('context',context);
+    container.register(RouteParser.name,routeParser);
+    container.register(Storage.name, storage);
+    container.register(PayloadFilter.name, payloadFilter);
+    container.register(FileParser.name, fileParser);
+    const laravelRoutes = new LaravelRoutes(context,container,"routes");
+    // run 
+    laravelRoutes.start()
       .then(() => {
         console.log(` ${CONFIG.extensionName} started`);
-      },(exception:Exception)=>{
-        vscode.window.showErrorMessage(`failed to execute ${CONFIG.extensionName} [${exception.getMessage()}]`);
+      }, (exception: Exception) => {
+        console.log(exception);
+        
+        // vscode.window.showErrorMessage(`failed to execute ${CONFIG.extensionName} [${exception.getMessage()}]`);
       });
   });
   context.subscriptions.push(start);
@@ -31,4 +48,4 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }

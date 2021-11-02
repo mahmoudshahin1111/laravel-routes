@@ -3,9 +3,9 @@ import { RouteParser } from "./route-parser";
 import { Route, RouteGroup } from "./types";
 
 export class FileParser {
-  private routeGroups: RouteGroup[];
+
   constructor(private routeParser: RouteParser, private payloadFilter: PayloadFilter) {
-    this.routeGroups = [];
+
   }
   parse(payload: string): RouteGroup[] {
     /**
@@ -17,5 +17,4 @@ export class FileParser {
     const filteredPayload:string = this.payloadFilter.filter(payload);
     return this.routeParser.parse(filteredPayload);
   }
-
 }

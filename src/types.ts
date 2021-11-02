@@ -1,3 +1,5 @@
+import * as vscode from "vscode";
+import { Container } from "./container";
 
 export interface Route{
     prefix:string;
@@ -8,9 +10,4 @@ export interface RouteGroup{
     routes:Route[];
     payload:string;
 }
-export interface Config{
-    routesDirPath:string
-}
-export interface StorageConfig{
-    routesDirPath?:string
-}
+

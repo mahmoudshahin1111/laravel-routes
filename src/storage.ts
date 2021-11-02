@@ -1,23 +1,20 @@
 import * as vscode from "vscode";
-import { Route, StorageConfig } from "./types";
-import { posix } from "path";
+import { Container } from "./container";
+
 export class Storage {
-  private storageRoutesFilePath: vscode.Uri;
-  constructor(config:StorageConfig) {
-    this.storageRoutesFilePath = this.resolveStoragePath();
-  }
-  private resolveStoragePath(): vscode.Uri {
-    return vscode.Uri.file((vscode.workspace.workspaceFolders?vscode.workspace.workspaceFolders[0].uri.path:'') +  "/laravel-routes.json");
-  }
-  set<T>(routes: T[]): Thenable<void> {
-    return vscode.workspace.fs.writeFile(this.storageRoutesFilePath, Buffer.from(JSON.stringify(routes)));
-  }
-  get<T>(): Promise<T[]> {
-      return new Promise<T[]>(resolve=>{
-        return vscode.workspace.fs.readFile(this.storageRoutesFilePath).then(e=>{
-            resolve( JSON.parse(e.toString()));
-        });
-      })
+  constructor(private container:Container) {
  
+  }
+  set<T>(key: string, data: T): Thenable<void> {
+    const context = this.container.get<vscode.ExtensionContext>('context');
+    return context.workspaceState.update(key, Buffer.from(JSON.stringify(data)))
+  }
+  get<T>(key: string): Promise<T> {
+    const context = this.container.get<vscode.ExtensionContext>('context');
+    return new Promise<T>(resolve => {
+      const payload = context.workspaceState.get(key) as Int8Array[];
+      resolve(JSON.parse(payload.toString()) as T);
+    })
+
   }
 }

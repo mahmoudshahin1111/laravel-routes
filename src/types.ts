@@ -1,5 +1,3 @@
-import * as vscode from "vscode";
-import { Container } from "./container";
 
 export interface Route{
     prefix:string;

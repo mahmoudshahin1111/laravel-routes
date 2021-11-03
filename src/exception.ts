@@ -6,3 +6,4 @@ export class Exception {
         return this.message;
     }
 }
+

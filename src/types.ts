@@ -9,3 +9,7 @@ export interface RouteGroup{
     payload:string;
 }
 
+export interface RouteFile{
+    routeGroups:RouteGroup[];
+    path:string;
+}

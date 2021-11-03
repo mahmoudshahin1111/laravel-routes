@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import { Container } from "./container";
-import { Exception } from "./exception";
+import {Exception} from './exception';
 import { FileParser } from "./file-parser";
 import { LaravelRoutes } from "./laravel-routes";
 import { PayloadFilter } from "./payload-filter";
@@ -38,9 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
       .then(() => {
         console.log(` ${CONFIG.extensionName} started`);
       }, (exception: Exception) => {
-        console.log(exception);
-        
-        // vscode.window.showErrorMessage(`failed to execute ${CONFIG.extensionName} [${exception.getMessage()}]`);
+        vscode.window.showErrorMessage(`failed to execute ${CONFIG.extensionName} [${exception.getMessage()}]`);
       });
   });
   context.subscriptions.push(start);

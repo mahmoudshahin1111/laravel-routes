@@ -1,29 +1,29 @@
-import { Route, RouteGroup } from "./types";
+import { Route, RouteGroup } from "../types";
 
 
 
-export class RouteParser {
+export class RouteResolver {
 
     constructor() {
 
     }
-    parse(payload: string): RouteGroup[] {
+    resolve(payload: string): RouteGroup[] {
         let routeGroups: RouteGroup[] = [];
         const routeGroupsPayloads: string[] | null = this.getRouteGroupsPayloads(payload);
         if (!routeGroupsPayloads) return routeGroups;
         for (const routeGroupPayload of routeGroupsPayloads) {
-            routeGroups = routeGroups.concat(this.parseRouteGroups(routeGroupPayload));
+            routeGroups = routeGroups.concat(this.resolveRouteGroups(routeGroupPayload));
         }
         return routeGroups;
     }
-    parseRouteGroups(payload: string): RouteGroup[] {
+    private resolveRouteGroups(payload: string): RouteGroup[] {
 
         let routeGroups: RouteGroup[] = [];
         const routeGroupsPayloads: string[] | null = this.getRouteGroupsPayloads(payload);
         if (!routeGroupsPayloads) return routeGroups;
         for (const routeGroupPayload of routeGroupsPayloads) {
             if (routeGroupPayload !== payload) {
-                const nestedRouteGroups = this.parseRouteGroups(routeGroupPayload);
+                const nestedRouteGroups = this.resolveRouteGroups(routeGroupPayload);
                 if (nestedRouteGroups.length) routeGroups = routeGroups.concat(nestedRouteGroups);
             }
             const routeGroup = this.parseRouteGroup(routeGroupPayload);
@@ -36,7 +36,7 @@ export class RouteParser {
         return payload.match(/(group(.|\n)*?function\((.|\n)*?\)\{(.|\n)*?}\))|(Route::(middleware|name|prefix|domain|namespace))(.|\n)*?function\((.|\n)*?\)\{(.|\n)*?}\)/gm);
     }
     private parseRouteGroup(payload: string): RouteGroup {
-        const routes: Route[] = this.parseRoutes(payload);
+        const routes: Route[] = this.resolveRoutes(payload);
         const routeGroup: RouteGroup = {
             payload,
             routes
@@ -55,18 +55,18 @@ export class RouteParser {
         return matched[0];
     }
 
-    parseRoutes(payload: string): Route[] {
+    private resolveRoutes(payload: string): Route[] {
         const routes: Route[] = [];
         const matches = payload.match(/Route::(get|post|put|delete|update])(.|\n)*?;/gm);
         if (!matches) return routes;
         for (const matched of matches) {
-            const route = this.parseRoute(matched);
+            const route = this.resolveRoute(matched);
             if (!route) continue;
             routes.push(route);
         }
         return routes;
     }
-    private parseRoute(payload: string): Route | null {
+    private resolveRoute(payload: string): Route | null {
         const route: Route = {
             payload
         } as Route;

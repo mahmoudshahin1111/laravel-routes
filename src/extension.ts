@@ -9,6 +9,5 @@ export function activate(context: vscode.ExtensionContext) {
   console.log(`Congratulations, your extension ${CONFIG.extensionName} is now active!`);
   let startCommand = vscode.commands.registerCommand(`${CONFIG.commandPrefix}.start`, () => startCommandHandler(context));
   context.subscriptions.push(startCommand);
-  vscode.commands.executeCommand(`${CONFIG.commandPrefix}.start`);
 }
 export function deactivate() {}

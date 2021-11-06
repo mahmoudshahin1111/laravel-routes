@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { CompletionRoutesProvider } from "./completion-routes-provider";
 import { Exception } from "./exception";
 
-import { FileResolver } from "./resolvers/file-resolver";
+
 import {
   InlineCommentsFilter,
   MultiLinesCommentFilter,
@@ -18,25 +18,29 @@ import { Route, RouteGroup } from "./types";
 import * as transformers from "./utils/transformers";
 export class LaravelRoutes {
   private storage: Storage;
-  private fileResolver: FileResolver;
   constructor(private context: vscode.ExtensionContext, private routesDirPath: string) {}
 
   async start() {
     await this.errorHandler(
       async () => {
+        this.storage = new Storage(this.context);
         const payloadFilter = new PayloadFilter();
         payloadFilter.add(new InlineCommentsFilter());
         payloadFilter.add(new MultiLinesCommentFilter());
         payloadFilter.add(new PhpKeywordsFilter());
         payloadFilter.add(new PhpTagsFilter());
         payloadFilter.add(new SpacesFilter());
-        this.fileResolver = new FileResolver(new RouteResolver(), payloadFilter);
-        this.storage = new Storage(this.context);
+       
         const routeFiles: RouteFile[] = [];
         const routesFilesPaths = await vscode.workspace.findFiles(`${this.routesDirPath}/**/*.php`);
         for (const routeFilePath of routesFilesPaths) {
           const payload = await vscode.workspace.fs.readFile(routeFilePath);
-          const routeGroups: RouteGroup[] = this.fileResolver.resolve(payload.toString());
+          const filteredPayload: string = payloadFilter.filter(payload.toString());
+          // search about the route file name into providers
+          console.log(routeFilePath.path);
+          
+          const routeResolver:RouteResolver = new RouteResolver();
+          const routeGroups: RouteGroup[] = routeResolver.resolve(filteredPayload.toString());
           routeFiles.push(new RouteFile(routeFilePath.path, routeGroups));
         }
         await this.storeRouteFiles(routeFiles);
@@ -44,8 +48,6 @@ export class LaravelRoutes {
         routeFiles.forEach((routeFile) => {
           routes = routes.concat(routeFile.resolveRoutes());
         });
-        console.log(routes);
-        
         this.registerCompletionRoutesProvider(routes);
       },
       () => {}
@@ -63,9 +65,8 @@ export class LaravelRoutes {
       }
     }
   }
-  private async storeRouteFiles(routeFiles: RouteFile[]) {
-    await this.storage.set<RouteFile[]>("route_files", routeFiles);
-    const data = await this.storage.get<RouteFile[]>("route_files");
+  private  storeRouteFiles(routeFiles: RouteFile[]):Thenable<void> {
+    return this.storage.set<RouteFile[]>("route_files", routeFiles);
   }
   private registerCompletionRoutesProvider(routes: Route[]) {
     const items: vscode.CompletionItem[] = routes.map((route) => transformers.convertRouteToCompletionItem(route));

@@ -1,11 +1,17 @@
+
 import { Route, RouteGroup } from "../types";
+import { Resolver } from "./resolver";
 
 
 
-export class RouteResolver {
-
+export class RouteResolver implements Resolver<RouteGroup[]> {
+    private globalPrefix:string;
     constructor() {
 
+    }
+    withGlobalPrefix(prefix:string):RouteResolver{
+        this.globalPrefix = prefix;
+        return this;
     }
     resolve(payload: string): RouteGroup[] {
         let routeGroups: RouteGroup[] = [];
@@ -13,9 +19,17 @@ export class RouteResolver {
         if (!routeGroupsPayloads) return routeGroups;
         for (const routeGroupPayload of routeGroupsPayloads) {
             routeGroups = routeGroups.concat(this.resolveRouteGroups(routeGroupPayload));
+            payload =  payload.replace(routeGroupPayload,'');
         }
+        
+        routeGroups.push({
+            payload:payload,
+            prefix:'',
+            routes:this.resolveRoutes(payload)
+        });
         return routeGroups;
     }
+   
     private resolveRouteGroups(payload: string): RouteGroup[] {
 
         let routeGroups: RouteGroup[] = [];
@@ -28,7 +42,9 @@ export class RouteResolver {
             }
             const routeGroup = this.parseRouteGroup(routeGroupPayload);
             routeGroups.push(routeGroup);
+   
         }
+
         return routeGroups;
     }
 
@@ -78,9 +94,9 @@ export class RouteResolver {
         return route;
     }
     private getPrefixOfPayload(payload: string): string | null {
-        const matched = payload.match(/[get|post|update|put|delete]+\(\'(.+)\',/m);
+        const matched = payload.match(/\'(.+?)\'/m);
         if (!matched) return null;
-        else if (matched.length > 0) return matched[1];
-        return matched[0];
+        else if (matched.length === 1) return matched[0];
+        return matched[1];
     }
 }

@@ -94,7 +94,7 @@ export class RouteResolver implements Resolver<RouteGroup[]> {
         return route;
     }
     private getPrefixOfPayload(payload: string): string | null {
-        const matched = payload.match(/\'(.+?)\'/m);
+        const matched = payload.match(/\'(.+?)\',/m);
         if (!matched) return null;
         else if (matched.length === 1) return matched[0];
         return matched[1];

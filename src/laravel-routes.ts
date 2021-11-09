@@ -16,6 +16,7 @@ import { RouteResolver } from "./resolvers/route-resolver";
 import { Storage } from "./storage";
 import { Route, RouteGroup } from "./types";
 import * as transformers from "./utils/transformers";
+import { GlobalPrefixResolver } from "./resolvers/global-prefix-resolver";
 export class LaravelRoutes {
   private storage: Storage;
   constructor(private context: vscode.ExtensionContext, private routesDirPath: string) {}
@@ -35,24 +36,30 @@ export class LaravelRoutes {
         const routesFilesPaths = await vscode.workspace.findFiles(`${this.routesDirPath}/**/*.php`);
         for (const routeFilePath of routesFilesPaths) {
           const payload = await vscode.workspace.fs.readFile(routeFilePath);
+          // resolve global prefix of providers
+
+          const fileNameSections:string[] = routeFilePath.path.split('/');
+          const globalPrefixResolver = new GlobalPrefixResolver(fileNameSections[fileNameSections.length-1]);
+          // resolve the routes of the files 
           const filteredPayload: string = payloadFilter.filter(payload.toString());
-          // search about the route file name into providers
-          console.log(routeFilePath.path);
-          
           const routeResolver:RouteResolver = new RouteResolver();
           const routeGroups: RouteGroup[] = routeResolver.resolve(filteredPayload.toString());
-          routeFiles.push(new RouteFile(routeFilePath.path, routeGroups));
+          routeFiles.push(new RouteFile(routeFilePath.path, routeGroups,await globalPrefixResolver.resolve('')));
         }
         await this.storeRouteFiles(routeFiles);
         let routes: Route[] = [];
         routeFiles.forEach((routeFile) => {
           routes = routes.concat(routeFile.resolveRoutes());
         });
+    
+        
         this.registerCompletionRoutesProvider(routes);
+        console.log(routes);
       },
       () => {}
     );
   }
+  
   private async errorHandler(operation: Function, fails: Function) {
     try {
       await operation.call(this);

@@ -4,7 +4,7 @@ import { Resolver } from "./resolver";
 
 
 
-export class RouteResolver implements Resolver<RouteGroup[]> {
+export class RouteResolver implements Resolver<RouteGroup<string>[]> {
     private globalPrefix:string;
     constructor() {
 
@@ -13,8 +13,8 @@ export class RouteResolver implements Resolver<RouteGroup[]> {
         this.globalPrefix = prefix;
         return this;
     }
-    resolve(payload: string): RouteGroup[] {
-        let routeGroups: RouteGroup[] = [];
+    resolve(payload: string): RouteGroup<string>[] {
+        let routeGroups: RouteGroup<string>[] = [];
         const routeGroupsPayloads: string[] | null = this.getRouteGroupsPayloads(payload);
         if (!routeGroupsPayloads) return routeGroups;
         for (const routeGroupPayload of routeGroupsPayloads) {
@@ -30,9 +30,9 @@ export class RouteResolver implements Resolver<RouteGroup[]> {
         return routeGroups;
     }
    
-    private resolveRouteGroups(payload: string): RouteGroup[] {
+    private resolveRouteGroups(payload: string): RouteGroup<string>[] {
 
-        let routeGroups: RouteGroup[] = [];
+        let routeGroups: RouteGroup<string>[] = [];
         const routeGroupsPayloads: string[] | null = this.getRouteGroupsPayloads(payload);
         if (!routeGroupsPayloads) return routeGroups;
         for (const routeGroupPayload of routeGroupsPayloads) {
@@ -51,11 +51,12 @@ export class RouteResolver implements Resolver<RouteGroup[]> {
     private getRouteGroupsPayloads(payload: string): string[] | null {
         return payload.match(/(group(.|\n)*?function\((.|\n)*?\)\{(.|\n)*?}\))|(Route::(middleware|name|prefix|domain|namespace))(.|\n)*?function\((.|\n)*?\)\{(.|\n)*?}\)/gm);
     }
-    private parseRouteGroup(payload: string): RouteGroup {
+    private parseRouteGroup(payload: string): RouteGroup<string> {
         const routes: Route[] = this.resolveRoutes(payload);
-        const routeGroup: RouteGroup = {
+        const routeGroup: RouteGroup<string> = {
             payload,
-            routes
+            routes,
+            prefix:''
         }
         const prefix = this.getRouteGroupPrefixOfPayload(payload);
         if (prefix) {

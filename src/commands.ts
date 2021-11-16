@@ -13,5 +13,9 @@ export function startCommandHandler(context: vscode.ExtensionContext) {
   laravelRoutes
     .start()
     .then(() => console.log(` ${CONFIG.extensionName} started`))
-    .catch((exception: Exception) => vscode.window.showErrorMessage(`failed to execute ${CONFIG.extensionName} [${exception.getMessage()}]`));
+    .catch((exception: Exception) => {
+      console.error(exception.getMessage());
+      
+      vscode.window.showErrorMessage(`failed to execute ${CONFIG.extensionName} [${exception.getMessage()}]`)
+    });
 }

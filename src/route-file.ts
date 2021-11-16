@@ -1,7 +1,7 @@
 import { Route, RouteGroup } from "./types";
-
+import * as phpParser from 'php-parser';
 export class RouteFile {
-  constructor(private path: string, private routeGroups: RouteGroup[],private prefix:string) {}
+  constructor(private path: string, private routeGroups: RouteGroup<phpParser.Engine>[],private prefix:string) {}
   resolveRoutes(): Route[] {
     let routes: Route[] = [];
     const filePrefix:string = this.prefix?this.prefix.replace(/\/$/,''):'';

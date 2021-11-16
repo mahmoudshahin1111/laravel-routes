@@ -4,19 +4,14 @@ import { Exception } from "./exception";
 
 
 import {
-  InlineCommentsFilter,
-  MultiLinesCommentFilter,
-  PayloadFilter,
-  PhpKeywordsFilter,
-  PhpTagsFilter,
-  SpacesFilter
-} from "./filters/payload-filter";
+  PayloadFilter} from "./filters/payload-filter";
 import { RouteFile } from "./route-file";
-import { RouteResolver } from "./resolvers/route-resolver";
 import { Storage } from "./storage";
 import { Route, RouteGroup } from "./types";
 import * as transformers from "./utils/transformers";
 import { GlobalPrefixResolver } from "./resolvers/global-prefix-resolver";
+import * as phpParser from 'php-parser';
+import { PhpRouteGroupResolver } from "./resolvers/php-route-group-resolver";
 export class LaravelRoutes {
   private storage: Storage;
   constructor(private context: vscode.ExtensionContext, private routesDirPath: string) {}
@@ -25,12 +20,7 @@ export class LaravelRoutes {
     await this.errorHandler(
       async () => {
         this.storage = new Storage(this.context);
-        const payloadFilter = new PayloadFilter();
-        payloadFilter.add(new InlineCommentsFilter());
-        payloadFilter.add(new MultiLinesCommentFilter());
-        payloadFilter.add(new PhpKeywordsFilter());
-        payloadFilter.add(new PhpTagsFilter());
-        payloadFilter.add(new SpacesFilter());
+    
        
         const routeFiles: RouteFile[] = [];
         const routesFilesPaths = await vscode.workspace.findFiles(`${this.routesDirPath}/**/*.php`);
@@ -41,9 +31,11 @@ export class LaravelRoutes {
           const fileNameSections:string[] = routeFilePath.path.split('/');
           const globalPrefixResolver = new GlobalPrefixResolver(fileNameSections[fileNameSections.length-1]);
           // resolve the routes of the files 
+          const payloadFilter = new PayloadFilter();
           const filteredPayload: string = payloadFilter.filter(payload.toString());
-          const routeResolver:RouteResolver = new RouteResolver();
-          const routeGroups: RouteGroup[] = routeResolver.resolve(filteredPayload.toString());
+          const engine = new phpParser.Engine({parser:{extractDoc:true,php7:true},ast:{withPositions:true}});
+          const phpRouteGroupResolver:PhpRouteGroupResolver = new PhpRouteGroupResolver(engine);
+          const routeGroups: RouteGroup<phpParser.Engine>[] = phpRouteGroupResolver.resolve(filteredPayload.toString());
           routeFiles.push(new RouteFile(routeFilePath.path, routeGroups,await globalPrefixResolver.resolve('')));
         }
         await this.storeRouteFiles(routeFiles);
@@ -77,6 +69,6 @@ export class LaravelRoutes {
   }
   private registerCompletionRoutesProvider(routes: Route[]) {
     const items: vscode.CompletionItem[] = routes.map((route) => transformers.convertRouteToCompletionItem(route));
-    this.context.subscriptions.push(vscode.languages.registerCompletionItemProvider({ language: "php" }, new CompletionRoutesProvider(items), "lr"));
+    this.context.subscriptions.push(vscode.languages.registerCompletionItemProvider({ language: "php" }, new CompletionRoutesProvider(items),'l','w'));
   }
 }

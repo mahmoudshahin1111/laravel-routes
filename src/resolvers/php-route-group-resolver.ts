@@ -7,7 +7,7 @@ export class PhpRouteGroupResolver implements Resolver<RouteGroup<phpParser.Engi
   resolve(payload: string): RouteGroup<phpParser.Engine>[] {
     const parsedPayload = this.engine.parseCode(payload, "");
     let routeGroups: RouteGroup<phpParser.Engine>[] = [];
-    parsedPayload.children.forEach((child: any) => {
+    parsedPayload.children.filter((child:any)=>child.kind === 'expressionstatement' && this.isRouteNode(child.expression)).forEach((child: any) => {
       if (this.isSingleRouteNode(child)) {
         routeGroups.push({ routes: [this.resolveRoute(child)], prefix: "", payload: child });
       } else {
@@ -16,9 +16,11 @@ export class PhpRouteGroupResolver implements Resolver<RouteGroup<phpParser.Engi
     });
     return routeGroups;
   }
-  private isRouteNode(node: phpParser.Node): boolean {
-    const expression = (<any>node).expression;
-    return node.kind === "expressionstatement" && expression?.what?.kind === "staticlookup" && expression?.what?.what?.name === "Route";
+  private isRouteNode(expression:any): boolean {
+    if(!expression) return false;
+    else if(String(expression.kind).toLowerCase() === 'name' && String(expression.name).toLowerCase() === 'route') return true;
+    else if(expression.what) return this.isRouteNode(expression.what) ;
+    return false;
   }
   private isSingleRouteNode(node: phpParser.Node): boolean {
     const expression = (<any>node).expression;
@@ -26,10 +28,10 @@ export class PhpRouteGroupResolver implements Resolver<RouteGroup<phpParser.Engi
     return (
       expression.what.offset.kind === "identifier" &&
       expression.arguments[0].kind === "string" &&
-      expression.what.offset.name.match(/(get|post|any|delete|put|patch)/gm)
+      expression.what.offset.name.match(/(get|post|any|delete|put|patch|options)/gm)
     );
   }
-  resolveRouteGroups(node: any, prevPrefix: string): RouteGroup<phpParser.Engine>[] {
+  private resolveRouteGroups(node: any, prevPrefix: string): RouteGroup<phpParser.Engine>[] {
     let routeGroups: RouteGroup<phpParser.Engine>[] = [];
     const groupPrefix = (prevPrefix && prevPrefix !== "" ? prevPrefix + "/" : "") + this.resolveRouteGroupPrefix(node);
     const routeGroup = { prefix: groupPrefix, routes: [], payload: node } as RouteGroup<phpParser.Engine>;
@@ -57,7 +59,7 @@ export class PhpRouteGroupResolver implements Resolver<RouteGroup<phpParser.Engi
   private resolveRoutePrefix(expression: any): string | null {
     let prefix = null;
     if (!expression) return null;
-    else if (expression.what?.offset?.name.match(/(get|post|any|delete|put|patch)/gm)) {
+    else if (expression.what?.offset?.name.match(/(get|post|any|delete|put|patch|'options')/gm)) {
       const prefixArgument = expression.arguments.find((argument: any) => argument.kind === "string");
       prefix = prefixArgument ? prefixArgument.value : null;
       return prefix;

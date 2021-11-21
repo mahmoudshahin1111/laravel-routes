@@ -2,7 +2,7 @@ import { Resolver } from "./resolver";
 import * as vscode from "vscode";
 import { InlineCommentsFilter, MultiLinesCommentFilter, PayloadFilter, PhpKeywordsFilter, PhpTagsFilter, SpacesFilter } from "../filters/payload-filter";
 export class GlobalPrefixResolver implements Resolver<Promise<string>> {
-  constructor(private routeFileName: string) {}
+  constructor(private providersFolderPath:string,private routeFileName: string) {}
   async resolve(payload: string): Promise<string> {
     const providersPayloads: string[] = await this.resolveProvidersPayloads();
     const filteredPayloads: string[] = [];
@@ -49,6 +49,6 @@ export class GlobalPrefixResolver implements Resolver<Promise<string>> {
     return vscode.workspace.fs.readFile(path);
   }
   private getProviderFiles(): Thenable<vscode.Uri[]> {
-    return vscode.workspace.findFiles("app/Providers/*.php");
+    return vscode.workspace.findFiles(`${this.providersFolderPath}/*.php`);
   }
 }

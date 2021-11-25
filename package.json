@@ -29,7 +29,7 @@
 				},
 				"routes.ProvidersFolderPath":{
 					"type":"string",
-					"default":"app/providers"
+					"default":"app/Providers"
 				}
 			}
 		}

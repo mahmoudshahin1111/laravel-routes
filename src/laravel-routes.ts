@@ -7,10 +7,10 @@ import { RouteFile } from "./route-file";
 import { Storage } from "./storage";
 import { Route, RouteGroup } from "./types";
 import * as transformers from "./utils/transformers";
-import { GlobalPrefixResolver } from "./resolvers/global-prefix-resolver";
 import * as phpParser from "php-parser";
 import { PhpRouteGroupResolver } from "./resolvers/php-route-group-resolver";
 import { CONFIG } from "./utils/config";
+import { RouteGlobalPrefixResolver } from "./resolvers/route-global-prefix-resolver";
 
 export class LaravelRoutes {
   private storage: Storage;
@@ -18,23 +18,27 @@ export class LaravelRoutes {
 
   async start() {
     try {
+      const engine = new phpParser.Engine({ parser: { extractDoc: true, php7: true }, ast: { withPositions: true } });
       this.storage = new Storage(this.context);
       const routeFiles: RouteFile[] = [];
       const routesFilesPaths = await vscode.workspace.findFiles(`${this.getRoutesFolderPath()}/**/*.php`);
       for (const routeFilePath of routesFilesPaths) {
         const payload = await vscode.workspace.fs.readFile(routeFilePath);
         // resolve global prefix of providers
-        const globalPrefixResolver = new GlobalPrefixResolver(
-          this.getProvidersFolderPath(),
-          this.resolveTheFileRouteFileNameOfThePath(routeFilePath.path)
-        );
-        // resolve the routes of the files
+        const path = this.getProvidersFolderPath();
+        const providersFilesPaths: vscode.Uri[] = await vscode.workspace.findFiles(`${path}/*.php`);
+        let globalPrefix = "";
+        for (const providerFilePath of providersFilesPaths) {
+          const routeGlobalPrefixResolver = new RouteGlobalPrefixResolver(engine);
+          const filePayload = await vscode.workspace.fs.readFile(providerFilePath);
+          globalPrefix = routeGlobalPrefixResolver.resolve(filePayload.toString(),this.resolveTheFileRouteFileNameOfThePath(routeFilePath.path));
+        }
         const payloadFilter = new PayloadFilter();
         const filteredPayload: string = payloadFilter.filter(payload.toString());
-        const engine = new phpParser.Engine({ parser: { extractDoc: true, php7: true }, ast: { withPositions: true } });
+
         const phpRouteGroupResolver: PhpRouteGroupResolver = new PhpRouteGroupResolver(engine);
         const routeGroups: RouteGroup<phpParser.Engine>[] = phpRouteGroupResolver.resolve(filteredPayload.toString());
-        routeFiles.push(new RouteFile(routeFilePath.path, routeGroups, await globalPrefixResolver.resolve("")));
+        routeFiles.push(new RouteFile(routeFilePath.path, routeGroups, globalPrefix));
       }
       await this.storeRouteFiles(routeFiles);
       let routes: Route[] = [];
@@ -53,7 +57,7 @@ export class LaravelRoutes {
     }
   }
   private resolveTheFileRouteFileNameOfThePath(routeFilePath: string): string {
-    const pathSections = routeFilePath.split('/');
+    const pathSections = routeFilePath.split("/");
     const fileNameWithExtension: string = pathSections[pathSections.length - 1];
     const fileNameWithoutExtensionSections = fileNameWithExtension.split(".");
     return fileNameWithoutExtensionSections[0];

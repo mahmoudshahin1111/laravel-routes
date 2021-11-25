@@ -1,4 +1,6 @@
 export const CONFIG = {
     extensionName:"Laravel Routes",
-    commandPrefix:'laravel-routes'
+    extensionPrefix:'laravel-routes',
+    routesFolderPath:'routes',
+    providerFolderPath:'app/Providers',
 }

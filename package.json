@@ -16,14 +16,23 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "laravel-routes.helloWorld",
-				"title": "Hello World"
-			},
-			{
 				"command": "laravel-routes.start",
 				"title": "LaravelRoutes: Start"
 			}
-		]
+		],
+		"configuration":{
+			"title": "Laravel Routes",
+			"properties": {
+				"routes.RoutesFolderPath":{
+					"type":"string",
+					"default":"routes"
+				},
+				"routes.ProvidersFolderPath":{
+					"type":"string",
+					"default":"app/Providers"
+				}
+			}
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",

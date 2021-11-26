@@ -4,7 +4,7 @@ export interface Route{
     payload:string;
 }
 export interface RouteGroup<TPayload>{
-    prefix:string;
+    prefix:string|undefined;
     routes:Route[];
     payload:TPayload;
 }

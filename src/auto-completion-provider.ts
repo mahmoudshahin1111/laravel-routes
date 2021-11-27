@@ -1,12 +1,17 @@
 import * as vscode from "vscode";
-export class CompletionRoutesProvider implements vscode.CompletionItemProvider {
-  constructor(private items: vscode.CompletionItem[]) {}
+export class AutoCompletionProvider implements vscode.CompletionItemProvider {
+  private items:vscode.CompletionItem[];
+  constructor() {}
   provideCompletionItems(
     document: vscode.TextDocument,
     position: vscode.Position,
     token: vscode.CancellationToken,
     context: vscode.CompletionContext
   ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem>> {
-    return this.items;
+    return this.items ? this.items : [];
+  }
+  setItems(items:vscode.CompletionItem[]){
+    this.items= items;
+    return this;
   }
 }

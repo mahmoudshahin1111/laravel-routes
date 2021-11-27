@@ -24,7 +24,8 @@ export class LaravelRoutes {
     return this.booted;
   }
   boot() {
-    const subscription = vscode.languages.registerCompletionItemProvider({ language: "php" }, this.autoCompletionProvider, 'route("');
+  
+    const subscription = vscode.languages.registerCompletionItemProvider({ language: "php" }, this.autoCompletionProvider,'"');
     this.context.subscriptions.push(subscription);
     this.booted = true;
   }
@@ -61,19 +62,20 @@ export class LaravelRoutes {
   }
   private transformRoutes(globalPrefix: string | null, routeGroups: RouteGroup<phpParser.Engine>[]): Route[] {
     let routes: Route[] = [];
-    const filePrefix: string | null = globalPrefix ? trimLastSlash(globalPrefix) : null;
+    globalPrefix = globalPrefix ? trimLastSlash(globalPrefix) : null;
     routeGroups.forEach((routeGroup) => {
       routes = routes.concat(
         routeGroup.routes.map((route) => {
           return {
             ...route,
-            prefix: (filePrefix ? filePrefix + "/" : "") + (routeGroup.prefix ? routeGroup.prefix + "/" : "") + route.prefix
+            prefix: (globalPrefix ? globalPrefix + "/" : "") + (routeGroup.prefix ? routeGroup.prefix + "/" : "") + route.prefix
           };
         })
       );
     });
     return routes;
   }
+
   private resolveTheFileRouteFileNameOfThePath(routeFilePath: string): string {
     const pathSections = routeFilePath.split("/");
     const fileNameWithExtension: string = pathSections[pathSections.length - 1];

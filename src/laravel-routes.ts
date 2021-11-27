@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { CompletionRoutesProvider } from "./completion-routes-provider";
+import { AutoCompletionProvider } from "./auto-completion-provider";
 import { Exception } from "./exception";
 import { Storage } from "./storage";
 import { Route, RouteGroup } from "./types";
@@ -12,12 +12,24 @@ import { trimLastSlash } from "./filters/string";
 
 export class LaravelRoutes {
   private storage: Storage;
-  constructor(private context: vscode.ExtensionContext, private routesDirPath: string) {}
-
+  private autoCompletionProvider: AutoCompletionProvider;
+  private engine: phpParser.Engine;
+  private booted: boolean;
+  constructor(private context: vscode.ExtensionContext, private routesDirPath: string) {
+    this.engine = new phpParser.Engine({ parser: { extractDoc: true, php7: true }, ast: { withPositions: true } });
+    this.storage = new Storage(this.context);
+    this.autoCompletionProvider = new AutoCompletionProvider();
+  }
+  isBooted(): boolean {
+    return this.booted;
+  }
+  boot() {
+    const subscription = vscode.languages.registerCompletionItemProvider({ language: "php" }, this.autoCompletionProvider, 'route("');
+    this.context.subscriptions.push(subscription);
+    this.booted = true;
+  }
   async start() {
     try {
-      const engine = new phpParser.Engine({ parser: { extractDoc: true, php7: true }, ast: { withPositions: true } });
-      this.storage = new Storage(this.context);
       let transformedRoutes: Route[] = [];
       const routesFilesPaths = await vscode.workspace.findFiles(`${this.getRoutesFolderPath()}/**/*.php`);
       for (const routeFilePath of routesFilesPaths) {
@@ -27,12 +39,12 @@ export class LaravelRoutes {
         const providersFilesPaths: vscode.Uri[] = await vscode.workspace.findFiles(`${path}/*.php`);
         let globalPrefix = null;
         for (const providerFilePath of providersFilesPaths) {
-          const routeGlobalPrefixResolver = new RouteGlobalPrefixResolver(engine);
+          const routeGlobalPrefixResolver = new RouteGlobalPrefixResolver(this.engine);
           const filePayload = await vscode.workspace.fs.readFile(providerFilePath);
           globalPrefix = routeGlobalPrefixResolver.resolve(filePayload.toString(), this.resolveTheFileRouteFileNameOfThePath(routeFilePath.path));
           if (globalPrefix) break;
         }
-        const phpRouteGroupResolver: PhpRouteGroupResolver = new PhpRouteGroupResolver(engine);
+        const phpRouteGroupResolver: PhpRouteGroupResolver = new PhpRouteGroupResolver(this.engine);
         const routeGroups: RouteGroup<phpParser.Engine>[] = phpRouteGroupResolver.resolve(payload.toString());
         transformedRoutes = transformedRoutes.concat(this.transformRoutes(globalPrefix, routeGroups));
       }
@@ -81,8 +93,6 @@ export class LaravelRoutes {
   }
   private registerCompletionRoutesProvider(routes: Route[]) {
     const items: vscode.CompletionItem[] = routes.filter((route) => !!route.prefix).map((route) => transformers.convertRouteToCompletionItem(route));
-    this.context.subscriptions.push(
-      vscode.languages.registerCompletionItemProvider({ language: "php" }, new CompletionRoutesProvider(items), "l", "w")
-    );
+    this.autoCompletionProvider.setItems(items);
   }
 }

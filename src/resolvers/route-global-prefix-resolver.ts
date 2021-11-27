@@ -35,6 +35,7 @@ export class RouteGlobalPrefixResolver implements Resolver<string|null> {
     }
     return null;
   }
+
   private resolveRoutesStatements(routeFilePath: string, block: any): phpParser.ExpressionStatement[] {
     return block.children.filter(
       (child: any) => this.isRouteExpression(child.expression) && this.isRouteFilePathIncluded(routeFilePath, child.expression)

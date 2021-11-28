@@ -10,7 +10,7 @@ export class PhpRouteGroupResolver implements Resolver<RouteGroup<phpParser.Engi
     parsedPayload.children
       .filter((child: any) => child.kind === "expressionstatement" && this.isRouteNode(child.expression))
       .forEach((child: any) => {
-        if (this.isSingleRouteNode(child)) {
+        if (this.isSingleRouteNode(child.expression)) {
           routeGroups.push({ routes: [this.resolveRoute(child)], prefix: "", payload: child });
         } else {
           routeGroups = routeGroups.concat(this.resolveRouteGroups(child));
@@ -24,14 +24,15 @@ export class PhpRouteGroupResolver implements Resolver<RouteGroup<phpParser.Engi
     else if (expression.what) return this.isRouteNode(expression.what);
     return false;
   }
-  private isSingleRouteNode(node: phpParser.Node): boolean {
-    const expression = (<any>node).expression;
-    if (!expression) return false;
-    return (
-      expression.what.offset.kind === "identifier" &&
-      expression.arguments[0].kind === "string" &&
+  private isSingleRouteNode(expression: any): boolean {
+    if (
+      expression?.what?.offset?.kind === "identifier" &&
+      expression.kind === "call" &&
       expression.what.offset.name.match(/(get|post|any|delete|put|patch|options)/gm)
-    );
+    )
+      return true;
+    else if(expression?.what) return this.isSingleRouteNode(expression.what);
+    return false;
   }
   private resolveRouteGroups(node: any, prevPrefix?: string): RouteGroup<phpParser.Engine>[] {
     let routeGroups: RouteGroup<phpParser.Engine>[] = [];
@@ -63,7 +64,7 @@ export class PhpRouteGroupResolver implements Resolver<RouteGroup<phpParser.Engi
     if (!expression) return null;
     else if (expression.what?.offset?.name.match(/(get|post|any|delete|put|patch|'options')/gm)) {
       const prefixArgument: any = expression.arguments.find((argument: any) => argument.kind === "string") as phpParser.String;
-      if (prefixArgument){
+      if (prefixArgument) {
         return this.trimSlashes(prefixArgument.value);
       }
     } else if (expression.what) {
@@ -93,12 +94,12 @@ export class PhpRouteGroupResolver implements Resolver<RouteGroup<phpParser.Engi
       const arrayArgument = node.expression.arguments.find((argument: any) => argument.kind === "array");
       if (arrayArgument) {
         const arrayPrefixEntry = arrayArgument.items.find((item: any) => item.key.value === "prefix");
-        prefix = arrayPrefixEntry ?  this.trimSlashes(arrayPrefixEntry.value.value) : "";
+        prefix = arrayPrefixEntry ? this.trimSlashes(arrayPrefixEntry.value.value) : "";
       }
     }
     if (prefix) return this.trimSlashes(prefix);
     const expression = this.resolveExpressionByFunctionName("prefix", node.expression);
-    if (expression){
+    if (expression) {
       return this.trimSlashes(expression.arguments[0].value);
     }
     return null;

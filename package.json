@@ -1,8 +1,13 @@
 {
 	"name": "laravel-routes",
-	"displayName": "laravel-routes",
+	"displayName": "Laravel Routes",
 	"description": "Show your laravel routes as you didn't seen it before with all the details",
-	"version": "0.0.1",
+	"author": {
+		"name": "mahmoud shahin",
+		"email": "mahmoudshahin1111@gmail.com",
+		"url": ""
+	},
+	"version": "1.0.2",
 	"engines": {
 		"vscode": "^1.61.0"
 	},

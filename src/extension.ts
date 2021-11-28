@@ -7,7 +7,6 @@ import { LaravelRoutes } from "./laravel-routes";
 import { CONFIG } from "./utils/config";
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log(`Congratulations, your extension ${CONFIG.extensionName} is now active!`);
   const laravelRoutes = new LaravelRoutes(context, "routes");
   let startCommand = vscode.commands.registerCommand(`${CONFIG.extensionPrefix}.start`, () => {
     if (!laravelRoutes.isBooted()) laravelRoutes.boot();
@@ -15,8 +14,6 @@ export function activate(context: vscode.ExtensionContext) {
       .start()
       .then(() => console.log(` ${CONFIG.extensionName} started`))
       .catch((exception: Exception) => {
-        console.error(exception.getMessage());
-
         vscode.window.showErrorMessage(`failed to execute ${CONFIG.extensionName} [${exception.getMessage()}]`);
       });
   });

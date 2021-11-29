@@ -2,6 +2,10 @@
 
 laravel routes is amazing Visual Code Extension to help you write your routes without
 try to remember it's expressions.
+
+![](https://github.com/mahmoudshahin1111/laravel-routes/blob/master/assets/logo.png)
+
+
 ``
 ## Screenshot
 

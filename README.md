@@ -1,6 +1,6 @@
 # Laravel Routes
 
-laravel routes is a tool to help you write your routes without
+laravel routes is amazing Visual Code Extension to help you write your routes without
 try to remember it's syntax.
 ``
 ## Screenshot

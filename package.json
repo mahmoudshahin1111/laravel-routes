@@ -18,6 +18,7 @@
 		"onCommand:laravel-routes.start"
 	],
 	"main": "./dist/extension.js",
+	"repository": {"url": "https://github.com/mahmoudshahin1111/laravel-routes"},
 	"contributes": {
 		"commands": [
 			{

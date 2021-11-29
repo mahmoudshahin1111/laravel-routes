@@ -1,1 +1,0 @@
-Call {kind: 'call', loc: Location, what: StaticLookup, arguments: Array(2)}

@@ -1,6 +1,6 @@
 # Laravel Routes
 
-laravel routes is amazing Visual Code Extension to help you write your routes without
+laravel routes is amazing [Visual Code Extension](https://marketplace.visualstudio.com/items?itemName=MahmoudShahin.laravel-routes&ssr=false#overview) to help you write your routes without
 try to remember it's expressions.
 
 ![logo](https://raw.githubusercontent.com/mahmoudshahin1111/laravel-routes/master/assets/logo.png)

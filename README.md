@@ -6,6 +6,7 @@ try to remember it's syntax.
 ## Screenshot
 
 ![Demo](https://github.com/mahmoudshahin1111/laravel-routes/blob/master/assets/1.gif)
+
 ![Demo](https://github.com/mahmoudshahin1111/laravel-routes/blob/master/assets/2.gif)
 
 

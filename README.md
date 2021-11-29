@@ -12,7 +12,7 @@ try to remember it's syntax.
 
 ## How Works
 
-- Open the laravel project folder as a root folder otherwise you will need to edit the ![User Setting](https://github.com/mahmoudshahin1111/laravel-routes/blob/master/README.md#user-settings) 
+- Open the laravel project folder as a root folder otherwise you will need to edit the [User Setting](https://github.com/mahmoudshahin1111/laravel-routes/blob/master/README.md#user-settings) 
 - Press LEFT CTRL + SHIFT + P
 - Choose `LaravelRoutes: Start` 
 - Press Enter.

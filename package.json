@@ -8,7 +8,7 @@
 		"email": "mahmoudshahin1111@gmail.com",
 		"url": "https://mahmoudshahin.net"
 	},
-	"icon": "https://github.com/mahmoudshahin1111/laravel-routes/blob/master/assets/logo.png",
+	"icon": "assets/logo.png",
 	"version": "1.0.2",
 	"engines": {
 		"vscode": "^1.61.0"

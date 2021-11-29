@@ -30,3 +30,4 @@ try to remember it's syntax.
 
 ## License
 
+Please read [License](https://github.com/mahmoudshahin1111/laravel-routes/blob/master/README.md) for more information

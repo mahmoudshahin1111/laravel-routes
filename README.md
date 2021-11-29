@@ -12,11 +12,11 @@ try to remember it's syntax.
 
 ## How Works
 
-1- Open the laravel project folder as a root folder otherwise you will need to edit the "User Setting" in the section below 👇(https://github.com/mahmoudshahin1111/laravel-routes/blob/master/README.md#user-settings) 
-2- Press LEFT CTRL + SHIFT + P
-3- Choose `LaravelRoutes: Start` 
-4- Press Enter.
-5- Try to write any route path inside double quotes `"/* Your route Here */"` you will see a list of suggested routes with the same name 
+- Open the laravel project folder as a root folder otherwise you will need to edit the "User Setting" in the section below 👇(https://github.com/mahmoudshahin1111/laravel-routes/blob/master/README.md#user-settings) 
+- Press LEFT CTRL + SHIFT + P
+- Choose `LaravelRoutes: Start` 
+- Press Enter.
+- Try to write any route path inside double quotes `"/* Your route Here */"` you will see a list of suggested routes with the same name 
 
 
 ## User Settings

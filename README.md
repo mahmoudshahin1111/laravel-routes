@@ -1,7 +1,7 @@
 # Laravel Routes
 
 laravel routes is amazing Visual Code Extension to help you write your routes without
-try to remember it's syntax.
+try to remember it's expressions.
 ``
 ## Screenshot
 
